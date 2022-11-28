@@ -1,0 +1,89 @@
+#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+// SongNode class (Maya)
+struct SongNode {
+  public:
+    string title;
+    string artist;
+    SongNode(string t, string a) {
+      title = t;
+      artist = a;
+    }
+};
+
+// set data structure (Maya)
+struct SongSet {
+  private:
+    set<pair<SongNode, int>> songs;
+  public:
+    SongSet() {}
+    void add(SongNode song) {
+      bool found = false;
+      set<pair<SongNode, int>>::iterator itr;
+      for(itr = songs.begin; itr != songs.end(); itr++) {
+        if(itr.first.title == song.title && itr.first.artist == song.artist) {
+          found = true;
+          break;
+        }
+      }
+      if(!found) {
+        pair<SongNode, int> p;
+        p.first = song;
+        p.second = 0;
+        songs.insert(p);
+      }
+    }
+    void delete(SongNode song) {
+      set<pair<SongNode, int>>::iterator itr;
+      for(itr = songs.begin; itr != songs.end(); itr++) {
+        if(itr.first.title == song.title && itr.first.artist == song.artist) {
+          songs.erase(itr);
+          break;
+        }
+      }
+    }
+    vector<SongNode> getMostPopular() {
+      set<pair<SongNode, int>>::iterator itr;
+      set<pair<SongNode, int>>::iterator itr2 = songs.begin();
+      for(itr = songs.begin(); itr != songs.end(); itr++) {
+        if(itr.second > itr2.second) {
+          itr2 = itr;
+        }
+      }
+      vector<SongNode> popular;
+      for(itr = songs.begin(); itr != songs.end(); itr++) {
+        if(itr.second == itr2.second) {
+          popular.push_back(itr);
+        }
+      }
+      return popular;
+    }
+    vector<SongNode> getLeastPopular() {
+      set<pair<SongNode, int>>::iterator itr;
+      set<pair<SongNode, int>>::iterator itr2 = songs.begin();
+      for(itr = songs.begin(); itr != songs.end(); itr++) {
+        if(itr.second < itr2.second) {
+          itr2 = itr;
+        }
+      }
+      vector<SongNode> notPopular;
+      for(itr = songs.begin(); itr != songs.end(); itr++) {
+        if(itr.second == itr2.second) {
+          notPopular.push_back(itr);
+        }
+      }
+      return notPopular;
+    }
+    void printSong(SongNode song) {
+      cout << "Title: " << song.title << endl << "Artist: " << song.artist << endl;
+    }
+    void printTop(int n) {
+      // not sure
+    }
+};
+
+// priority queue data structure (Justus)
+// main implementation (Derek)
