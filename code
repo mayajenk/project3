@@ -45,6 +45,9 @@ struct SongSet {
         }
       }
     }
+    void play(SongNode song) {
+      // still need to do
+    }
     vector<SongNode> getMostPopular() {
       set<pair<SongNode, int>>::iterator itr;
       set<pair<SongNode, int>>::iterator itr2 = songs.begin();
