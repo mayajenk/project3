@@ -91,7 +91,10 @@ struct SongSet {
       cout << "Title: " << song.title << endl << "Artist: " << song.artist << endl;
     }
     void printTop(int n) {
-      // not sure
+      // create new songset with same songs
+      // get most popular
+      // delete the most popular from the new songset
+      // repeat until you print at least n songs
     }
 };
 
