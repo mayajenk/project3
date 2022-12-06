@@ -2,7 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <set>
+#include <unordered_set>
 #include <fstream>
 #include <sstream>
 #include <chrono>
@@ -22,12 +22,12 @@ struct SongNode {
 // set data structure (Maya)
 struct SongSet {
 private:
-    set<pair<SongNode, int>> songs;
+    unordered_set<pair<SongNode, int>> songs;
 public:
     SongSet() {}
     void add(SongNode song) {
         bool found = false;
-        set<pair<SongNode, int>>::iterator itr;
+        unordered_set<pair<SongNode, int>>::iterator itr;
         for(itr = songs.begin(); itr != songs.end(); itr++) {
             if(itr->first.title == song.title && itr->first.artist == song.artist) {
                 found = true;
@@ -40,7 +40,7 @@ public:
         }
     }
     void remove(SongNode song) {
-        set<pair<SongNode, int>>::iterator itr;
+        unordered_set<pair<SongNode, int>>::iterator itr;
         for(itr = songs.begin(); itr != songs.end(); itr++) {
             if(itr->first.title == song.title && itr->first.artist == song.artist) {
                 songs.erase(itr);
@@ -49,7 +49,7 @@ public:
         }
     }
     void play(SongNode song) {
-        set<pair<SongNode, int>>::iterator itr;
+        unordered_set<pair<SongNode, int>>::iterator itr;
         for(itr = songs.begin(); itr != songs.end(); itr++) {
             if(itr->first.title == song.title && itr->first.artist == song.artist) {
                 int newNum = itr->second + 1;
@@ -61,8 +61,8 @@ public:
         }
     }
     vector<SongNode> getMostPopular() {
-        set<pair<SongNode, int>>::iterator itr;
-        set<pair<SongNode, int>>::iterator itr2 = songs.begin();
+        unordered_set<pair<SongNode, int>>::iterator itr;
+        unordered_set<pair<SongNode, int>>::iterator itr2 = songs.begin();
         for(itr = songs.begin(); itr != songs.end(); itr++) {
             if(itr->second > itr2->second) {
                 itr2 = itr;
@@ -77,8 +77,8 @@ public:
         return popular;
     }
     vector<SongNode> getLeastPopular() {
-        set<pair<SongNode, int>>::iterator itr;
-        set<pair<SongNode, int>>::iterator itr2 = songs.begin();
+        unordered_set<pair<SongNode, int>>::iterator itr;
+        unordered_set<pair<SongNode, int>>::iterator itr2 = songs.begin();
         for(itr = songs.begin(); itr != songs.end(); itr++) {
             if(itr->second < itr2->second) {
                 itr2 = itr;
@@ -97,7 +97,7 @@ public:
     }
     void printTop(int n) {
         SongSet newS = SongSet();
-        set<pair<SongNode, int>>::iterator itr;
+        unordered_set<pair<SongNode, int>>::iterator itr;
         for(itr = songs.begin(); itr != songs.end(); itr++) {
             newS.songs.insert(make_pair(itr->first,itr->second));
         }
