@@ -118,25 +118,27 @@ struct SongPQNode {
 
 private:
 
-    vector<SongNode> songPQ;
+    vector<pair<string,string>> songPQ;
+    vector<pair<string,string>> songFrequency;
     vector<int> highestPlayedSong;
+
 
 public:
 
     SongPQNode() {}
 
-    void insertSong(vector<SongNode>& songs, SongNode s) {
+    void insertSong(SongNode s) {
 
-        SongNode currentSong = s;
         int priorityLevel = 0;
 
-        if(songs.empty()) {
+        if(songPQ.empty()) {
 
-            songPQ.push_back(currentSong);
+            songPQ.push_back(make_pair(s.title, s.artist));
+            songFrequency.push_back(make_pair(s.title, s.artist));
 
             if(highestPlayedSong.empty()) {
 
-                priorityLevel = count(songPQ.begin(), songPQ.end(), currentSong);
+                priorityLevel = count(songPQ.begin(), songPQ.end(), songPQ[0]);
 
                 highestPlayedSong.push_back(priorityLevel);
             }
@@ -144,47 +146,31 @@ public:
         }
         else {
 
-            auto iter = find(songPQ.begin(), songPQ.end(), currentSong);
 
-            if(iter != songPQ.end()) {
+            songPQ.push_back(make_pair(s.title, s.artist));
+            songFrequency.push_back(make_pair(s.title, s.artist));
 
-                songPQ.push_back(currentSong);
+            for(int i = 0; i < songPQ.size(); i++) {
 
-                for(int i = 0; i < songPQ.size(); i++) {
+                if(s.title == songPQ[i].first && s.artist == songPQ[i].second) {
 
-                    if(currentSong.title == songPQ[i].title && currentSong.artist == songPQ[i].artist) {
+                    priorityLevel = count(songFrequency.begin(), songFrequency.end(), songPQ[i]);
 
-                        priorityLevel = count(songPQ.begin(), songPQ.end(), currentSong);
-
-                        highestPlayedSong[i] = priorityLevel;
-
-                        break;
-                    }
-                }
-            }
-            else {
-
-                songPQ.push_back(currentSong);
-
-                for(int i = 0; i < songPQ.size(); i++) {
-
-                    if(currentSong.title == songPQ[i].title && currentSong.artist == songPQ[i].artist) {
-
-                        priorityLevel = count(songPQ.begin(), songPQ.end(), currentSong);
+                    if(priorityLevel > 1) {
 
                         highestPlayedSong[i] = priorityLevel;
 
-                        break;
-
+                        songPQ.pop_back();
                     }
                     else {
 
-                        priorityLevel = count(songPQ.begin(), songPQ.end(), currentSong);
-
                         highestPlayedSong.push_back(priorityLevel);
-
+                                                                    
                     }
+
+                    break;
                 }
+
             }
 
 
@@ -197,14 +183,14 @@ public:
 
                 while (parentSong >= 0 && highestPlayedSong[parentSong] < highestPlayedSong[childSong]) {
 
-                    string tempTitle = songPQ[parentSong].title;
-                    string tempArtist = songPQ[parentSong].artist;
+                    string tempTitle = songPQ[parentSong].first;
+                    string tempArtist = songPQ[parentSong].second;
 
-                    songPQ[parentSong].title = songPQ[childSong].title;
-                    songPQ[parentSong].artist = songPQ[childSong].artist;
+                    songPQ[parentSong].first = songPQ[childSong].first;
+                    songPQ[parentSong].second = songPQ[childSong].second;
 
-                    songPQ[childSong].title = tempTitle;
-                    songPQ[childSong].artist = tempArtist;
+                    songPQ[childSong].first = tempTitle;
+                    songPQ[childSong].second = tempArtist;
 
                     childSong = parentSong;
                     parentSong = ((childSong - 1) / 2);
@@ -213,23 +199,17 @@ public:
                 }
             }
 
-
-
-
-
         }
-
-
 
     }
 
 
-    void extractHighestPlayedSong(vector<SongNode>& songs) {
+    void extractHighestPrioritySong(SongNode s) {
 
-        if(songs.size() == 2) {
+        if(songPQ.size() == 2) {
 
-            songPQ[0].title = songPQ[songs.size()-1].title;
-            songPQ[0].artist = songPQ[songs.size()-1].artist;
+            songPQ[0].first = songPQ[songPQ.size()-1].first;
+            songPQ[0].second = songPQ[songPQ.size()-1].second;
 
         }
         else {
@@ -240,20 +220,20 @@ public:
             int leftChildSong = (2*parentSong) + 1;
             int rightChildSong = (2*parentSong) + 2;
 
-            songPQ[parentSong].title = songPQ[songs.size()-1].title;
-            songPQ[parentSong].artist = songPQ[songs.size()-1].artist;
+            songPQ[parentSong].first = songPQ[songPQ.size()-1].first;
+            songPQ[parentSong].second = songPQ[songPQ.size()-1].second;
 
 
             if(highestPlayedSong[parentSong] < highestPlayedSong[leftChildSong] && highestPlayedSong[leftChildSong] > highestPlayedSong[rightChildSong]) {
 
-                string tempTitle = songPQ[parentSong].title;
-                string tempArtist = songPQ[parentSong].artist;
+                string tempTitle = songPQ[parentSong].first;
+                string tempArtist = songPQ[parentSong].second;
 
-                songPQ[parentSong].title = songPQ[leftChildSong].title;
-                songPQ[parentSong].artist = songPQ[leftChildSong].artist;
+                songPQ[parentSong].first = songPQ[leftChildSong].first;
+                songPQ[parentSong].second = songPQ[leftChildSong].second;
 
-                songPQ[leftChildSong].title = tempTitle ;
-                songPQ[leftChildSong].artist = tempArtist;
+                songPQ[leftChildSong].first = tempTitle ;
+                songPQ[leftChildSong].second = tempArtist;
 
                 parentSong = leftChildSong;
 
@@ -264,14 +244,14 @@ public:
 
                     if(highestPlayedSong[parentSong] < highestPlayedSong[leftChildSong] && highestPlayedSong[leftChildSong] > highestPlayedSong[rightChildSong]) {
 
-                        tempTitle = songPQ[parentSong].title;
-                        tempArtist = songPQ[parentSong].artist;
+                        tempTitle = songPQ[parentSong].first;
+                        tempArtist = songPQ[parentSong].second;
 
-                        songPQ[parentSong].title = songPQ[leftChildSong].title;
-                        songPQ[parentSong].artist = songPQ[leftChildSong].artist;
+                        songPQ[parentSong].first = songPQ[leftChildSong].first;
+                        songPQ[parentSong].second = songPQ[leftChildSong].second;
 
-                        songPQ[leftChildSong].title = tempTitle ;
-                        songPQ[leftChildSong].artist = tempArtist;
+                        songPQ[leftChildSong].first = tempTitle ;
+                        songPQ[leftChildSong].second = tempArtist;
 
                         parentSong = leftChildSong;
 
@@ -282,14 +262,14 @@ public:
                     }
                     else if(highestPlayedSong[parentSong] < highestPlayedSong[rightChildSong] && highestPlayedSong[rightChildSong] > highestPlayedSong[leftChildSong]) {
 
-                        tempTitle = songPQ[parentSong].title;
-                        tempArtist = songPQ[parentSong].artist;
+                        tempTitle = songPQ[parentSong].first;
+                        tempArtist = songPQ[parentSong].second;
 
-                        songPQ[parentSong].title = songPQ[rightChildSong].title;
-                        songPQ[parentSong].artist = songPQ[rightChildSong].artist;
+                        songPQ[parentSong].first = songPQ[rightChildSong].first;
+                        songPQ[parentSong].second = songPQ[rightChildSong].second;
 
-                        songPQ[rightChildSong].title = tempTitle ;
-                        songPQ[rightChildSong].artist = tempArtist;
+                        songPQ[rightChildSong].first = tempTitle ;
+                        songPQ[rightChildSong].second = tempArtist;
 
                         parentSong = rightChildSong;
 
@@ -307,14 +287,14 @@ public:
             }
             else if(highestPlayedSong[parentSong] < highestPlayedSong[rightChildSong] && highestPlayedSong[rightChildSong] > highestPlayedSong[leftChildSong]) {
 
-                string tempTitle = songPQ[parentSong].title;
-                string tempArtist = songPQ[parentSong].artist;
+                string tempTitle = songPQ[parentSong].first;
+                string tempArtist = songPQ[parentSong].second;
 
-                songPQ[parentSong].title = songPQ[rightChildSong].title;
-                songPQ[parentSong].artist = songPQ[rightChildSong].artist;
+                songPQ[parentSong].first = songPQ[rightChildSong].first;
+                songPQ[parentSong].second = songPQ[rightChildSong].second;
 
-                songPQ[rightChildSong].title = tempTitle ;
-                songPQ[rightChildSong].artist = tempArtist;
+                songPQ[rightChildSong].first = tempTitle ;
+                songPQ[rightChildSong].second = tempArtist;
 
                 parentSong = rightChildSong;
 
@@ -325,14 +305,14 @@ public:
 
                     if(highestPlayedSong[parentSong] < highestPlayedSong[leftChildSong] && highestPlayedSong[leftChildSong] > highestPlayedSong[rightChildSong]) {
 
-                        tempTitle = songPQ[parentSong].title;
-                        tempArtist = songPQ[parentSong].artist;
+                        tempTitle = songPQ[parentSong].first;
+                        tempArtist = songPQ[parentSong].second;
 
-                        songPQ[parentSong].title = songPQ[leftChildSong].title;
-                        songPQ[parentSong].artist = songPQ[leftChildSong].artist;
+                        songPQ[parentSong].first = songPQ[leftChildSong].first;
+                        songPQ[parentSong].second = songPQ[leftChildSong].second;
 
-                        songPQ[leftChildSong].title = tempTitle ;
-                        songPQ[leftChildSong].artist = tempArtist;
+                        songPQ[leftChildSong].first = tempTitle ;
+                        songPQ[leftChildSong].second = tempArtist;
 
                         parentSong = leftChildSong;
 
@@ -343,14 +323,14 @@ public:
                     }
                     else if(highestPlayedSong[parentSong] < highestPlayedSong[rightChildSong] && highestPlayedSong[rightChildSong] > highestPlayedSong[leftChildSong]) {
 
-                        tempTitle = songPQ[parentSong].title;
-                        tempArtist = songPQ[parentSong].artist;
+                        tempTitle = songPQ[parentSong].first;
+                        tempArtist = songPQ[parentSong].second;
 
-                        songPQ[parentSong].title = songPQ[rightChildSong].title;
-                        songPQ[parentSong].artist = songPQ[rightChildSong].artist;
+                        songPQ[parentSong].first = songPQ[rightChildSong].first;
+                        songPQ[parentSong].second = songPQ[rightChildSong].second;
 
-                        songPQ[rightChildSong].title = tempTitle ;
-                        songPQ[rightChildSong].artist = tempArtist;
+                        songPQ[rightChildSong].first = tempTitle ;
+                        songPQ[rightChildSong].second = tempArtist;
 
                         parentSong = rightChildSong;
 
@@ -377,16 +357,17 @@ public:
         cout << "Title: " << song.title << endl << "Artist: " << song.artist << endl;
     }
 
-    void mostPopularSong(vector<SongNode>& songs) {
+    void mostPopularSong() {
 
-        cout << "Title: " << songs[0].title << endl;
-        cout << "Artist: " << songs[0].artist << endl;
+        cout << "Title: " << songPQ[0].first << endl;
+        cout << "Artist: " << songPQ[0].second << endl;
+        
     }
 
-    void leastPopularSong(vector<SongNode>& songs) {
+    void leastPopularSong() {
 
-        cout << "Title: " << songs[songs.size()-1].title << endl;
-        cout << "Artist: " << songs[songs.size()-1].artist << endl;
+        cout << "Title: " << songPQ[songPQ.size()-1].first << endl;
+        cout << "Artist: " << songPQ[songPQ.size()-1].second << endl;
     }
 
 
