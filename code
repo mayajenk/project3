@@ -52,7 +52,7 @@ struct SongSet {
       set<pair<SongNode, int>>::iterator itr;
       for(itr = songs.begin; itr != songs.end(); itr++) {
         if(itr->first.title == song.title && itr>first.artist == song.artist) {
-          int newNum = itr.second + 1;
+          int newNum = itr->second + 1;
           pair<SongNode, int> p(song, newNum);
           songs.erase(itr);
           songs.insert(p);
