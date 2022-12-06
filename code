@@ -21,95 +21,95 @@ struct SongNode {
 
 // set data structure (Maya)
 struct SongSet {
-  private:
+private:
     set<pair<SongNode, int>> songs;
-  public:
+public:
     SongSet() {}
     void add(SongNode song) {
-      bool found = false;
-      set<pair<SongNode, int>>::iterator itr;
-      for(itr = songs.begin(); itr != songs.end(); itr++) {
-        if(itr->first.title == song.title && itr->first.artist == song.artist) {
-          found = true;
-          break;
+        bool found = false;
+        set<pair<SongNode, int>>::iterator itr;
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            if(itr->first.title == song.title && itr->first.artist == song.artist) {
+                found = true;
+                break;
+            }
         }
-      }
-      if(!found) {
-        pair<SongNode, int> p(song, 0);
-        songs.insert(p);
-      }
+        if(!found) {
+            pair<SongNode, int> p(song, 0);
+            songs.insert(p);
+        }
     }
     void remove(SongNode song) {
-      set<pair<SongNode, int>>::iterator itr;
-      for(itr = songs.begin; itr != songs.end(); itr++) {
-        if(itr->first.title == song.title && itr->first.artist == song.artist) {
-          songs.erase(itr);
-          break;
+        set<pair<SongNode, int>>::iterator itr;
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            if(itr->first.title == song.title && itr->first.artist == song.artist) {
+                songs.erase(itr);
+                break;
+            }
         }
-      }
     }
     void play(SongNode song) {
-      set<pair<SongNode, int>>::iterator itr;
-      for(itr = songs.begin; itr != songs.end(); itr++) {
-        if(itr->first.title == song.title && itr>first.artist == song.artist) {
-          int newNum = itr->second + 1;
-          pair<SongNode, int> p(song, newNum);
-          songs.erase(itr);
-          songs.insert(p);
-          break;
+        set<pair<SongNode, int>>::iterator itr;
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            if(itr->first.title == song.title && itr->first.artist == song.artist) {
+                int newNum = itr->second + 1;
+                pair<SongNode, int> p(song, newNum);
+                songs.erase(itr);
+                songs.insert(p);
+                break;
+            }
         }
-      }
     }
     vector<SongNode> getMostPopular() {
-      set<pair<SongNode, int>>::iterator itr;
-      set<pair<SongNode, int>>::iterator itr2 = songs.begin();
-      for(itr = songs.begin(); itr != songs.end(); itr++) {
-        if(itr->second > itr2->second) {
-          itr2 = itr;
+        set<pair<SongNode, int>>::iterator itr;
+        set<pair<SongNode, int>>::iterator itr2 = songs.begin();
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            if(itr->second > itr2->second) {
+                itr2 = itr;
+            }
         }
-      }
-      vector<SongNode> popular;
-      for(itr = songs.begin(); itr != songs.end(); itr++) {
-        if(itr->second == itr2->second) {
-          popular.push_back(itr->first);
+        vector<SongNode> popular;
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            if(itr->second == itr2->second) {
+                popular.push_back(itr->first);
+            }
         }
-      }
-      return popular;
+        return popular;
     }
     vector<SongNode> getLeastPopular() {
-      set<pair<SongNode, int>>::iterator itr;
-      set<pair<SongNode, int>>::iterator itr2 = songs.begin();
-      for(itr = songs.begin(); itr != songs.end(); itr++) {
-        if(itr->second < itr2->second) {
-          itr2 = itr;
+        set<pair<SongNode, int>>::iterator itr;
+        set<pair<SongNode, int>>::iterator itr2 = songs.begin();
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            if(itr->second < itr2->second) {
+                itr2 = itr;
+            }
         }
-      }
-      vector<SongNode> notPopular;
-      for(itr = songs.begin(); itr != songs.end(); itr++) {
-        if(itr->second == itr2->second) {
-          notPopular.push_back(itr->first);
+        vector<SongNode> notPopular;
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            if(itr->second == itr2->second) {
+                notPopular.push_back(itr->first);
+            }
         }
-      }
-      return notPopular;
+        return notPopular;
     }
     void printSong(SongNode song) {
-      cout << "Title: " << song.title << endl << "Artist: " << song.artist << endl;
+        cout << "Title: " << song.title << endl << "Artist: " << song.artist << endl;
     }
     void printTop(int n) {
-      SongSet newS = SongSet();
-      set<pair<SongNode, int>>::iterator itr;
-      for(itr = songs.begin(); itr != songs.end(); itr++) {
-        newS.songs.insert(make_pair(itr->first,itr->second));
-      }
-      int count = 0;
-      while(count < n) {
-        vector<SongNode> mostCurr = newS.getMostPopular();
-        for(int i = 0; i < mostCurr.size(); i++) {
-          newS.printSong(mostCurr[i]);
-          count++;
-          newS.remove(mostCurr[i]);
+        SongSet newS = SongSet();
+        set<pair<SongNode, int>>::iterator itr;
+        for(itr = songs.begin(); itr != songs.end(); itr++) {
+            newS.songs.insert(make_pair(itr->first,itr->second));
         }
-      }
+        int count = 0;
+        while(count < n) {
+            vector<SongNode> mostCurr = newS.getMostPopular();
+            for(int i = 0; i < mostCurr.size(); i++) {
+                newS.printSong(mostCurr[i]);
+                count++;
+                newS.remove(mostCurr[i]);
+            }
+        }
     }
 };
 
