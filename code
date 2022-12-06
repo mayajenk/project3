@@ -36,8 +36,6 @@ struct SongSet {
       }
       if(!found) {
         pair<SongNode, int> p(song, 0);
-        //p.first = song;
-        //p.second = 0;
         songs.insert(p);
       }
     }
@@ -54,8 +52,10 @@ struct SongSet {
       set<pair<SongNode, int>>::iterator itr;
       for(itr = songs.begin; itr != songs.end(); itr++) {
         if(itr->first.title == song.title && itr>first.artist == song.artist) {
-          //This is line that causes errors.  
-          itr.second++;
+          int newNum = itr.second + 1;
+          pair<SongNode, int> p(song, newNum);
+          songs.erase(itr);
+          songs.insert(p);
           break;
         }
       }
