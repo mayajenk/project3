@@ -3,6 +3,7 @@
 #include <vector>
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
 #include <fstream>
 #include <sstream>
 #include <chrono>
@@ -108,6 +109,86 @@ public:
                 newS.printSong(mostCurr[i]);
                 count++;
                 newS.remove(mostCurr[i]);
+            }
+        }
+    }
+};
+
+//map data structure (Derek)
+struct SongMap {
+private:
+    unordered_map<string, int> songs;
+public:
+    SongMap() {}
+    void add(string song) {
+        if (songs.find(song) == songs.end()) {
+            songs[song] = 0;
+        }
+    }
+    void addPopularity(string song, int pop) {
+        if (songs.find(song) == songs.end()) {
+            songs[song] = pop;
+        }
+    }
+    void remove(string song) {
+        songs.erase(song);
+    }
+    void play(string song) {
+        if (songs.find(song) != songs.end()) {
+            songs[song]++;
+        }
+    }
+    vector<string> getMostPopular() {
+        unordered_map<string, int>::iterator itr;
+        unordered_map<string, int>::iterator itr2 = songs.begin();
+        for (itr = songs.begin(); itr != songs.end(); itr++) {
+            if (itr->second > itr2->second) {
+                itr2 = itr;
+            }
+        }
+        vector<string> popular;
+        for (itr = songs.begin(); itr != songs.end(); itr++) {
+            if (itr->second == itr2->second) {
+                popular.push_back(itr->first);
+            }
+        }
+        return popular;
+    }
+    vector<string> getLeastPopular() {
+        unordered_map<string, int>::iterator itr;
+        unordered_map<string, int>::iterator itr2 = songs.begin();
+        for (itr = songs.begin(); itr != songs.end(); itr++) {
+            if (itr->second < itr2->second) {
+                itr2 = itr;
+            }
+        }
+        vector<string> notPopular;
+        for (itr = songs.begin(); itr != songs.end(); itr++) {
+            if (itr->second == itr2->second) {
+                notPopular.push_back(itr->first);
+            }
+        }
+        return notPopular;
+    }
+    void printSong(string song) {
+        cout << song;
+    }
+    void printTop(int n) {
+        SongMap newS;
+        unordered_map<string, int>::iterator itr;
+        for (itr = songs.begin(); itr != songs.end(); itr++) {
+            newS.addPopularity(itr->first, itr->second);
+
+        }
+        int count = 0;
+        while (count < n) {
+            vector<string> mostCurr = newS.getMostPopular();
+            for (int i = 0; i < mostCurr.size(); i++) {
+                newS.printSong(mostCurr[i]);
+                cout << endl;
+                count++;
+                newS.remove(mostCurr[i]);
+                if (count == n) { break; }
             }
         }
     }
@@ -406,66 +487,152 @@ void ReadCSVSet(SongSet& songs, string filename) {
     }
 }
 
-// main implementation (Derek)
+void ReadCSVPQ(SongPQNode& songs, string filename) {
+    fstream songReader;
+    songReader.open(filename, ios::in);
+    string line;
+    string tempName;
+    string tempArtist;
+    string waste;
+
+    if (songReader.is_open()) {
+        //get rid of top row
+        while (getline(songReader, line)) {
+            stringstream str(line);
+            //Skip ID value
+            getline(str, waste, ',');
+            //Grab track name
+            getline(str, tempName, ',');
+            //Skip popularity, duration, and explicit values
+            for (int i = 0; i < 3; i++) {
+                getline(str, waste, ',');
+            }
+            //Grab artist name
+            getline(str, tempArtist, ',');
+            //Create SongNode and add it to Set
+            songs.insertSong(SongNode(tempName, tempArtist));
+        }
+    }
+    else {
+        cout << "Coud not open the file. << endl";
+    }
+}
+
 int main() {
-    //Create Set 
-    //SongSet SetofSongs = new SongSet();
-    SongSet SetofSongs;
+    //Prompt user to choose data structure
+    int choice = 0;
+    cout << "Would you like to time the map (1) or the priority queue (2)? ";
+    cin >> choice;
+    cout << "Inserting songs..." << endl;
 
-    //Add songs from data set to SongSet (and time how long it takes)
-    string filename = "tracks.csv";
-    auto start = chrono::steady_clock::now();
-    ReadCSVSet(SetofSongs, filename);
-    auto end = chrono::steady_clock::now();
+    if (choice == 2) {
+        //Create Priority Queue
+        SongPQNode PQofSongs;
 
-    cout << "Elapsed time in seconds for inserting songs into Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+        //Add songs from data set to PQ (and time how long it takes)
+        string filename = "tracks.csv";
+        auto start = chrono::steady_clock::now();
+        ReadCSVPQ(PQofSongs, filename);
+        auto end = chrono::steady_clock::now();
 
-    //Time Algorithms of Set of Songs
-    //Play song from set:
-    SongNode sampleSong("Stay With Me", "['Akcent']");
-    start = chrono::steady_clock::now();
-    SetofSongs.play(sampleSong);
-    end = chrono::steady_clock::now();
+        cout << "Elapsed time in seconds for inserting songs into Priority Queue: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
 
-    cout << "Elapsed time in seconds for playing song from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+        //Extract highest priority song from PQ
+        SongNode sampleSong("Mirage", "['Adolphe Bérard']");
+        PQofSongs.insertSong(sampleSong); //Insert a song again to increase its popularity (now this is the most popular song)
+        start = chrono::steady_clock::now();
+        PQofSongs.extractHighestPrioritySong();
+        end = chrono::steady_clock::now();
 
-    //Get most popular song from set:
-    start = chrono::steady_clock::now();
-    vector<SongNode> mostPopularfromSet = SetofSongs.getMostPopular();
-    end = chrono::steady_clock::now();
+        cout << "Elapsed time in seconds for extracting most popular song from Priority Queue: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
 
-    cout << "Elapsed time in seconds for getting most popular song(s) from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+        //Print most popular song from PQ
+        SongNode sampleSong2("Car Loans", "['Uli']");
+        for (int j = 0; j < 10; j++) {
+            PQofSongs.insertSong(sampleSong2);
+        }
+        start = chrono::steady_clock::now();
+        PQofSongs.mostPopularSong();
+        end = chrono::steady_clock::now();
 
-    //Get least popular song(s) from set:
-    start = chrono::steady_clock::now();
-    vector<SongNode> LeastPopularfromSet = SetofSongs.getLeastPopular();
-    end = chrono::steady_clock::now();
+        cout << "Elapsed time in seconds for printing most popular song from Priority Queue: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
 
-    cout << "Elapsed time in seconds for getting least popular song(s) from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+        //Print least popular song from PQ
+        start = chrono::steady_clock::now();
+        PQofSongs.leastPopularSong();
+        end = chrono::steady_clock::now();
 
-    //Print Song
-    start = chrono::steady_clock::now();
-    SetofSongs.printSong(sampleSong);
-    end = chrono::steady_clock::now();
+        cout << "Elapsed time in seconds for printing least popular song from Priority Queue: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
 
-    cout << "Elapsed time in seconds for printing song from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+        //Print song title and artist name
+        start = chrono::steady_clock::now();
+        PQofSongs.printSong(sampleSong);
+        end = chrono::steady_clock::now();
+
+        cout << "Elapsed time in seconds for printing song title and artist name: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+    }
+    else if (choice == 1) {
+        //Create Map;
+        SongMap SetofSongs;
+
+        //Add songs from data set to SongSet (and time how long it takes)
+        string filename = "tracks.csv";
+        auto start = chrono::steady_clock::now();
+        ReadCSVSet(SetofSongs, filename);
+        auto end = chrono::steady_clock::now();
+
+        cout << "Elapsed time in seconds for inserting songs into Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+
+        //Time Algorithms of Set of Songs
+        //Play song from set:
+        string sampleSong = "Cosmos ['ARASHI']";
+        //"Stay With Me['Akcent']";
+        start = chrono::steady_clock::now();
+        SetofSongs.play(sampleSong);
+        end = chrono::steady_clock::now();
+
+        cout << "Elapsed time in seconds for playing song from Set: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds" << endl;
+
+        //Get most popular song from set:
+        start = chrono::steady_clock::now();
+        vector<string> mostPopularfromSet = SetofSongs.getMostPopular();
+        end = chrono::steady_clock::now();
+        for (int i = 0; i < mostPopularfromSet.size(); i++) {
+            cout << "Most popular song(s): " << mostPopularfromSet.at(i) << endl;
+        }
+
+        cout << "Elapsed time in seconds for getting most popular song(s) from Set: " << chrono::duration_cast<chrono::milliseconds>(end - start).count() << " milliseconds" << endl;
+
+        //Get least popular song(s) from set:
+        start = chrono::steady_clock::now();
+        vector<string> LeastPopularfromSet = SetofSongs.getLeastPopular();
+        end = chrono::steady_clock::now();
+
+        cout << "Elapsed time in seconds for getting least popular song(s) from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+
+        //Print Song
+        start = chrono::steady_clock::now();
+        SetofSongs.printSong(sampleSong);
+        end = chrono::steady_clock::now();
+
+        cout << endl << "Elapsed time in seconds for printing song from Set: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds" << endl;
 
 
-    //Print Top N Songs (50 for this example)
-    int n = 50;
-    start = chrono::steady_clock::now();
-    SetofSongs.printTop(n);
-    end = chrono::steady_clock::now();
+        //Print Top N Songs (50 for this example)
+        int n = 50;
+        start = chrono::steady_clock::now();
+        cout << "Top " << n << " songs: " << endl;
+        SetofSongs.printTop(n);
+        end = chrono::steady_clock::now();
 
-    cout << "Elapsed time in seconds for printing top 50 songs from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
+        cout << "Elapsed time in seconds for printing top 50 songs from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
 
-    //Delete Song from Set:
-    start = chrono::steady_clock::now();
-    SetofSongs.remove(sampleSong);
-    end = chrono::steady_clock::now();
-    cout << "Elapsed time in seconds for removing a song from Set: " << chrono::duration_cast<chrono::seconds>(end - start).count() << " seconds" << endl;
-
-    //Create Priority Queue
+        //Delete Song from Set:
+        start = chrono::steady_clock::now();
+        SetofSongs.remove(sampleSong);
+        end = chrono::steady_clock::now();
+        cout << "Elapsed time in seconds for removing a song from Set: " << chrono::duration_cast<chrono::microseconds>(end - start).count() << " microseconds" << endl;
+    }
 
     return 0;
 }
